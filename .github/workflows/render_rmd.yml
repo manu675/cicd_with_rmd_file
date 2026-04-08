@@ -1,0 +1,38 @@
+name: Render my document # name of the github action
+
+# block 1: specify when you want the action to runp
+# trigger (github action auto rendering will be triggered by a git push)
+on:
+  push:
+   ## paths:
+   ##   - docs/test.Rmd # runs when changes to this document are pushed
+        branches: [ main ] # runs when anything is pushed to main
+  workflow_dispatch:
+
+
+# block 2: tell github where the job will be run
+jobs:
+  render:
+    name: Render my document
+    runs-on: macOS-latest
+
+# block 3: setup your environment with the following pre-built actions using "uses:" tags
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+
+# block 4: define your actions using "run:" tags, | splits across multiple lines
+      - name: Install packages and render the Rmd file
+        run: | # add used packages here
+          install.packages(c("rmarkdown","tidyverse")) 
+          rmarkdown::render("docs/test.Rmd", output_format = "html")
+        shell: Rscript {0} # R executes the commands directly
+
+
+      - name: Commit results
+        run: |
+          git add docs/my-document*
+          git commit -m 'Re-build my-document' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"

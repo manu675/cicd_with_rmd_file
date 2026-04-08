@@ -1,6 +1,6 @@
-skeleton <- glue::glue('
+##skeleton <- glue::glue('
 ---
-title: "My document"
+title: "Har_Model_Botta"
 author: 
   name: Manuel Schreiber
 output: html_document
@@ -10,11 +10,124 @@ output: html_document
 ---
 
 Introduction
----
+##---
 
-Some highly informative text.
+## Some highly informative text.
 
-')
+##')
 
-dir.create(here::here("my-document"))
-cat(skeleton, file = here::here("my-document", "my-document.Rmd"))
+#dir.create(here::here("my-document"))
+#cat(skeleton, file = here::here("my-document", "my-document.Rmd"))
+
+
+
+## Section 1: data preparation ##
+
+# install libraries
+install.packages("quantmod")
+
+# Load required libraries
+suppressMessages({ library(quantmod); library(xts)
+})
+# Download S&P 500 data (2020-2023)
+getSymbols("^GSPC", from="2020-01-01", to="2023-12-31", auto.assign=TRUE, warnings=FALSE)
+
+prices <- Cl(GSPC) 
+
+returns <- diff(log(prices))[-1]
+
+print(returns)
+print(prices)
+
+# Calculate realized variance (proxy using squared returns)
+rv <- as.numeric(returns^2 * 252) # Annualized realized variance 
+
+rv <- rv[!is.na(rv)] # Remove NAs
+
+rv
+
+# Create HAR regressors
+n <- length(rv) 
+
+start_idx <- 23
+
+# Pre-allocate matrices
+n_obs <- n - start_idx + 1
+
+y <- numeric(n_obs); X <- matrix(NA, n_obs, 4)
+
+length(y)
+
+colnames(X) <- c("Intercept", "Daily", "Weekly", "Monthly")
+
+# Fill data matrices
+for(i in 1:n_obs) {
+
+t <- start_idx + i - 1
+# Dependent variable
+y[i] <- rv[t]
+# Regressors
+X[i, 1] <- 1 
+X[i, 2] <- rv[t-1] 
+X[i, 3] <- mean(rv[(t-5):(t-1)]) 
+X[i, 4] <- mean(rv[(t-22):(t-1)]) 
+
+}
+
+T_obs <- length(y)
+
+
+## Section 2: MCMC functions ##
+
+# Gibbs sampler for Bayesian HAR
+gibbs_har <- function(y, X, n_iter = 10000, burnin = 2000) { # Prior parameters
+beta_0 <- c(0, 0.4, 0.3, 0.2) # Prior means
+V_0 <- diag(c(100, 0.04, 0.04, 0.04)) # Prior covariance 
+a_0 <- 2; b_0 <- 1 # InvGamma parameters for sigma^2
+
+a_0
+
+# Initialize
+k <- ncol(X); T_obs <- length(y); beta <- beta_0; sigma2 <- 1
+# Store only post-burnin samples
+n_keep <- n_iter - burnin
+beta_draws <- matrix(NA, n_keep, k); sigma2_draws <- numeric(n_keep)
+
+# Precompute
+V_0_inv <- solve(V_0); XtX <- t(X) %*% X; Xty <- t(X) %*% y
+
+##print(V_0_inv )
+
+for (iter in 1:n_iter) {
+# Update beta | sigma2, y
+V_n_inv <- V_0_inv + XtX / sigma2
+V_n <- solve(V_n_inv)
+beta_n <- V_n %*% (V_0_inv %*% beta_0 + Xty / sigma2) 
+beta <- drop(beta_n + t(chol(V_n)) %*% rnorm(k))
+# Update sigma2 | beta, y
+residuals <- y - X %*% beta
+a_n <- a_0 + T_obs / 2
+b_n <- b_0 + sum(residuals^2) / 2 
+sigma2 <- 1 / rgamma(1, a_n, b_n)
+# Store post-burnin draws only
+if (iter > burnin) {
+beta_draws[iter - burnin, ] <- beta; sigma2_draws[iter - burnin] <- sigma2
+  } # end if function
+
+ } # end for loop
+
+  return(list(beta = beta_draws,
+              sigma2 = sigma2_draws))
+
+} # end function body
+
+## Section 3: extracting the results ##
+
+results <- gibbs_har(y, X)
+
+colMeans(results$beta)
+
+mean(results$sigma2) # posterior mean for the std dev
+
+
+##hist(results$beta)

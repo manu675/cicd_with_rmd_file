@@ -21,10 +21,13 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v1
 
 # block 4: define your actions using "run:" tags, | splits across multiple lines
-      - name: Install rmarkdown
-        run: Rscript -e 'install.packages("rmarkdown")'
-      - name: Render my document to all types
-        run: Rscript -e 'rmarkdown::render("docs/test.Rmd", output_format = "all")'
+      - name: Install packages and render the Rmd file
+        run: | # add used packages here
+          install.packages(c("rmarkdown","tidyverse")) 
+          rmarkdown::render("docs/test.Rmd", output_format = "html")
+        shell: Rscript {0} # R executes the commands directly
+
+
       - name: Commit results
         run: |
           git add docs/my-document*

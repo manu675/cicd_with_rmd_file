@@ -1,0 +1,19 @@
+skeleton <- glue::glue('
+---
+title: "My document"
+output: 
+  github_document: default
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+Introduction
+---
+
+Some highly informative text.
+
+')
+
+dir.create(here::here("my-document"))
+cat(skeleton, file = here::here("my-document", "my-document.Rmd"))

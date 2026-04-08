@@ -2,8 +2,10 @@
 # trigger (github action auto rendering will be triggered by a git push)
 on:
   push:
-    paths:
-      - docs/test.Rmd # runs when changes to this document are pushed
+   ## paths:
+   ##   - docs/test.Rmd # runs when changes to this document are pushed
+        branches: [ main ] # runs when anything is pushed to main
+  workflow_dispatch:
 
 name: Render my document
 

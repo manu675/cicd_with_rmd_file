@@ -27,7 +27,7 @@ jobs:
       - name: Install packages and render the Rmd file
         run: | # add used packages here
           install.packages(c("rmarkdown","tidyverse")) 
-          rmarkdown::render("docs/test.Rmd", output_format = "html")
+          rmarkdown::render("test.Rmd", output_format = "html")
         shell: Rscript {0} # R executes the commands directly
 
 

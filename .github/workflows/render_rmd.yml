@@ -1,4 +1,4 @@
-name: Render my document # name of the github action
+name: Render R markdown # name of the github action
 
 # block 1: specify when you want the action to runp
 # trigger (github action auto rendering will be triggered by a git push)
@@ -33,6 +33,8 @@ jobs:
 
       - name: Commit results
         run: |
-          git add docs/my-document*
-          git commit -m 'Re-build my-document' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"
+          git config manu675 github-actions
+          git config manuelalex.schreiber@gmail.com github-actions@github.com
+          git add docs/
+          git commit -m "Re-build test document" || echo "No changes"
+          git push

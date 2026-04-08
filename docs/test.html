@@ -353,17 +353,106 @@ display: none;
 
 
 <div id="skeleton---glueglue" class="section level2">
-<h2>skeleton &lt;- glue::glue(’</h2>
-<p>title: “My document” output: html_document #github_document: default
-#word_document: default #html_document: default #pdf_document: default
-—</p>
+<h2>##skeleton &lt;- glue::glue(’</h2>
+title: “Har_Model_Botta” author: name: Manuel Schreiber output:
+html_document header-includes: -
+<ul>
+<li><hr /></li>
+</ul>
+<p>Introduction ##—</p>
 </div>
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<p>Some highly informative text.</p>
-<p>’)</p>
-<p>dir.create(here::here(“my-document”)) cat(skeleton, file =
+<div id="some-highly-informative-text." class="section level2">
+<h2>Some highly informative text.</h2>
+<p>##’)</p>
+<p>#dir.create(here::here(“my-document”)) #cat(skeleton, file =
 here::here(“my-document”, “my-document.Rmd”))</p>
+</div>
+<div id="section-1-data-preparation" class="section level2">
+<h2>Section 1: data preparation</h2>
+</div>
+<div id="install-libraries" class="section level1">
+<h1>install libraries</h1>
+<p>install.packages(“quantmod”)</p>
+</div>
+<div id="load-required-libraries" class="section level1">
+<h1>Load required libraries</h1>
+<p>suppressMessages({ library(quantmod); library(xts) }) # Download
+S&amp;P 500 data (2020-2023) getSymbols(“^GSPC”, from=“2020-01-01”,
+to=“2023-12-31”, auto.assign=TRUE, warnings=FALSE)</p>
+<p>prices &lt;- Cl(GSPC)</p>
+<p>returns &lt;- diff(log(prices))[-1]</p>
+<p>print(returns) print(prices)</p>
+</div>
+<div id="calculate-realized-variance-proxy-using-squared-returns" class="section level1">
+<h1>Calculate realized variance (proxy using squared returns)</h1>
+<p>rv &lt;- as.numeric(returns^2 * 252) # Annualized realized
+variance</p>
+<p>rv &lt;- rv[!is.na(rv)] # Remove NAs</p>
+<p>rv</p>
+</div>
+<div id="create-har-regressors" class="section level1">
+<h1>Create HAR regressors</h1>
+<p>n &lt;- length(rv)</p>
+<p>start_idx &lt;- 23</p>
+</div>
+<div id="pre-allocate-matrices" class="section level1">
+<h1>Pre-allocate matrices</h1>
+<p>n_obs &lt;- n - start_idx + 1</p>
+<p>y &lt;- numeric(n_obs); X &lt;- matrix(NA, n_obs, 4)</p>
+<p>length(y)</p>
+<p>colnames(X) &lt;- c(“Intercept”, “Daily”, “Weekly”, “Monthly”)</p>
+</div>
+<div id="fill-data-matrices" class="section level1">
+<h1>Fill data matrices</h1>
+<p>for(i in 1:n_obs) {</p>
+<p>t &lt;- start_idx + i - 1 # Dependent variable y[i] &lt;- rv[t] #
+Regressors X[i, 1] &lt;- 1 X[i, 2] &lt;- rv[t-1] X[i, 3] &lt;-
+mean(rv[(t-5):(t-1)]) X[i, 4] &lt;- mean(rv[(t-22):(t-1)])</p>
+<p>}</p>
+<p>T_obs &lt;- length(y)</p>
+<div id="section-2-mcmc-functions" class="section level2">
+<h2>Section 2: MCMC functions</h2>
+</div>
+</div>
+<div id="gibbs-sampler-for-bayesian-har" class="section level1">
+<h1>Gibbs sampler for Bayesian HAR</h1>
+<p>gibbs_har &lt;- function(y, X, n_iter = 10000, burnin = 2000) { #
+Prior parameters beta_0 &lt;- c(0, 0.4, 0.3, 0.2) # Prior means V_0
+&lt;- diag(c(100, 0.04, 0.04, 0.04)) # Prior covariance a_0 &lt;- 2; b_0
+&lt;- 1 # InvGamma parameters for sigma^2</p>
+<p>a_0</p>
+</div>
+<div id="initialize" class="section level1">
+<h1>Initialize</h1>
+<p>k &lt;- ncol(X); T_obs &lt;- length(y); beta &lt;- beta_0; sigma2
+&lt;- 1 # Store only post-burnin samples n_keep &lt;- n_iter - burnin
+beta_draws &lt;- matrix(NA, n_keep, k); sigma2_draws &lt;-
+numeric(n_keep)</p>
+</div>
+<div id="precompute" class="section level1">
+<h1>Precompute</h1>
+<p>V_0_inv &lt;- solve(V_0); XtX &lt;- t(X) %<em>% X; Xty &lt;- t(X)
+%</em>% y</p>
+<p>##print(V_0_inv )</p>
+<p>for (iter in 1:n_iter) { # Update beta | sigma2, y V_n_inv &lt;-
+V_0_inv + XtX / sigma2 V_n &lt;- solve(V_n_inv) beta_n &lt;- V_n %<em>%
+(V_0_inv %</em>% beta_0 + Xty / sigma2) beta &lt;- drop(beta_n +
+t(chol(V_n)) %<em>% rnorm(k)) # Update sigma2 | beta, y residuals &lt;-
+y - X %</em>% beta a_n &lt;- a_0 + T_obs / 2 b_n &lt;- b_0 +
+sum(residuals^2) / 2 sigma2 &lt;- 1 / rgamma(1, a_n, b_n) # Store
+post-burnin draws only if (iter &gt; burnin) { beta_draws[iter - burnin,
+] &lt;- beta; sigma2_draws[iter - burnin] &lt;- sigma2 } # end if
+function</p>
+<p>} # end for loop</p>
+<p>return(list(beta = beta_draws, sigma2 = sigma2_draws))</p>
+<p>} # end function body</p>
+<div id="section-3-extracting-the-results" class="section level2">
+<h2>Section 3: extracting the results</h2>
+<p>results &lt;- gibbs_har(y, X)</p>
+<p>colMeans(results$beta)</p>
+<p>mean(results$sigma2) # posterior mean for the std dev</p>
+<p>##hist(results$beta)</p>
+</div>
 </div>
 
 

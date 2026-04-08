@@ -1,11 +1,12 @@
 skeleton <- glue::glue('
 ---
 title: "My document"
+author: 
+  name: Manuel Schreiber
 output: html_document
-  #github_document: default
-  #word_document: default
-  #html_document: default
-  #pdf_document: default
+ header-includes:
+   - \usepackage{amsmath}
+   - \usepackage{amsfonts}
 ---
 
 Introduction

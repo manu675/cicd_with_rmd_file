@@ -1,50 +1,51 @@
-##skeleton <- glue::glue('
+
 ---
 title: "Har_Model_Botta"
 author: 
   name: Manuel Schreiber
 output: html_document
- header-includes:
-   - \usepackage{amsmath}
-   - \usepackage{amsfonts}
+
 ---
-
-Introduction
-##---
-
-## Some highly informative text.
-
-##')
-
-#dir.create(here::here("my-document"))
-#cat(skeleton, file = here::here("my-document", "my-document.Rmd"))
 
 
 
 ## Section 1: data preparation ##
 
+$$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$ : "continuous grow rate from P1 to P2"
+f.ex. log(96/95)=log(1.01053)~0.0105, i.e. a growth rate of 1.05% or the log return
+the percentage change would be $$\frac{P2-P1}{P1}=\frac{96-95}{95}~0.0105$$
+
+```{r}
 # install libraries
-install.packages("quantmod")
+if (!require("quantmod")) install.packages("quantmod")
 
 # Load required libraries
 suppressMessages({ library(quantmod); library(xts)
 })
-# Download S&P 500 data (2020-2023)
+# Download S&P 500 data (2020-2023, i.e. 4 years)
 getSymbols("^GSPC", from="2020-01-01", to="2023-12-31", auto.assign=TRUE, warnings=FALSE)
 
-prices <- Cl(GSPC) 
+prices <- Cl(GSPC) # closing prices (252*4 = 1008)
 
-returns <- diff(log(prices))[-1]
+print(length(prices))
+
+# log(P_t) - log(P_{t-1}) = approximation of a percentage change (for small changes)
+# continuously compounded rate of return (i.e. the log return)
+returns <- diff(log(prices))[-1]  
 
 print(returns)
 print(prices)
+```
 
+```{r}
 # Calculate realized variance (proxy using squared returns)
 rv <- as.numeric(returns^2 * 252) # Annualized realized variance 
 
 rv <- rv[!is.na(rv)] # Remove NAs
 
-rv
+head(rv)
+
+print( length(rv) )
 
 # Create HAR regressors
 n <- length(rv) 
@@ -59,7 +60,9 @@ y <- numeric(n_obs); X <- matrix(NA, n_obs, 4)
 length(y)
 
 colnames(X) <- c("Intercept", "Daily", "Weekly", "Monthly")
+```
 
+```{r}
 # Fill data matrices
 for(i in 1:n_obs) {
 
@@ -67,20 +70,34 @@ t <- start_idx + i - 1
 # Dependent variable
 y[i] <- rv[t]
 # Regressors
-X[i, 1] <- 1 
-X[i, 2] <- rv[t-1] 
-X[i, 3] <- mean(rv[(t-5):(t-1)]) 
-X[i, 4] <- mean(rv[(t-22):(t-1)]) 
+X[i, 1] <- 1 # intercept
+X[i, 2] <- rv[t-1] # daily rv
+X[i, 3] <- mean(rv[(t-5):(t-1)]) # weekly realized variance (5 trading days)
+X[i, 4] <- mean(rv[(t-22):(t-1)])  # monthly rv
 
 }
 
 T_obs <- length(y)
 
+dim(X) # shape of the regressor matrix
+
+length(y) # length of the dep var vector
+
+head(y) # dependent variable
+
+head(X) # regressor matrix
+```
 
 ## Section 2: MCMC functions ##
 
+```{r}
 # Gibbs sampler for Bayesian HAR
-gibbs_har <- function(y, X, n_iter = 10000, burnin = 2000) { # Prior parameters
+gibbs_har <- function(y, 
+X, 
+n_iter = 10000, 
+burnin = 2000
+) 
+{ # Prior parameters
 beta_0 <- c(0, 0.4, 0.3, 0.2) # Prior means
 V_0 <- diag(c(100, 0.04, 0.04, 0.04)) # Prior covariance 
 a_0 <- 2; b_0 <- 1 # InvGamma parameters for sigma^2
@@ -109,6 +126,7 @@ residuals <- y - X %*% beta
 a_n <- a_0 + T_obs / 2
 b_n <- b_0 + sum(residuals^2) / 2 
 sigma2 <- 1 / rgamma(1, a_n, b_n)
+
 # Store post-burnin draws only
 if (iter > burnin) {
 beta_draws[iter - burnin, ] <- beta; sigma2_draws[iter - burnin] <- sigma2
@@ -116,18 +134,21 @@ beta_draws[iter - burnin, ] <- beta; sigma2_draws[iter - burnin] <- sigma2
 
  } # end for loop
 
-  return(list(beta = beta_draws,
+return(list(beta = beta_draws,
               sigma2 = sigma2_draws))
 
 } # end function body
+```
 
 ## Section 3: extracting the results ##
 
+```{r}
 results <- gibbs_har(y, X)
 
-colMeans(results$beta)
+colMeans(results$beta) # Means of the intecept col, daily, weekly, monthly rv
 
 mean(results$sigma2) # posterior mean for the std dev
 
 
 ##hist(results$beta)
+```

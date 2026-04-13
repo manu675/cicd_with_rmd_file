@@ -106,6 +106,9 @@ a_0
 
 # Initialize
 k <- ncol(X); T_obs <- length(y); beta <- beta_0; sigma2 <- 1
+
+
+
 # Store only post-burnin samples
 n_keep <- n_iter - burnin
 beta_draws <- matrix(NA, n_keep, k); sigma2_draws <- numeric(n_keep)
@@ -194,10 +197,26 @@ abline(v = 2000, col = "red", lty = 2, lwd = 2)
 legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 ```
 
+
+trace plot of all mcmc samples including the burn-in samples
+
+```{r}
+# setting the no. of burnin samples to 0 to plot all mcmc samples
+results <- gibbs_har(y, X, n_iter = 10000, burnin = 0)
+
+# Now results$beta contains all 10,000 iterations starting from iteration 1
+plot(results$beta[, 1], type = "l", main = "Trace Plot with Burn-in")
+```
+
+
+
 # 4.2 Multiple chains (running the algorithm multiple times in parallel)
 
 ```{r}
 library(parallel)
+
+# Run 2 chains (i.e. running the MCMC algorithm twice)
+n_chains <- 2
 
 
 # function to run chains in parallel (Mac/Linux use mclapply; Windows requires parLapply)
@@ -206,8 +225,6 @@ chains_list <- mclapply(1:n_chains, function(i) {
 }, mc.cores = n_chains)
 
 
-# Run 2 chains (i.e. running the MCMC algorithm twice)
-n_chains <- 2
 
 # lapply(): applies a function over a list or vector
 chains_out <- lapply(1:n_chains, function(i) {

@@ -10,7 +10,7 @@
 **I replicated his HAR model and added MCMC algorithm diagnostics.**   
 **Moreover, I added a continuous integration continuous deployment (CICD) workflow through Github actions and automated the knitting of the R Markdown file to HTML.**
 
-
+Here is the link to the document: https://manu675.github.io/cicd_with_rmd_file/test.html
 
 
 **References:**

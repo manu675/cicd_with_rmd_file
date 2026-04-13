@@ -145,7 +145,7 @@ return(list(beta = beta_draws,
 ```{r}
 results <- gibbs_har(y, X)
 
-colMeans(results$beta) # Means of the intecept col, daily, weekly, monthly rv
+colMeans(results$beta) # Means of the intercept col, daily, weekly, monthly rv
 
 mean(results$sigma2) # posterior mean for the std dev
 
@@ -155,10 +155,78 @@ mean(results$sigma2) # posterior mean for the std dev
 
 ## Section 4: MCMC diagnostics
 
+Recap of the Markov Chain Monte Carlo algorithm:
+* a sequence of random variables $\{X_t\}$ is produced
+* this sequence is a Markov Chain
+* the larger $t$ is, the more similar the distribution of $X_t$ is to the target distribution
+* two terms in the chain, $X_t$ and $X_{t+n}, become almost independent as $n$ gets large 
+* when we run a MCMC algorithm for $T$ periods, we obtain a MCMC sample of the first $T$ realizations of the chain, $$X_1,\ldots,X_T$$
+* we then use the empirical distribution of this MCMC sample to approximate the target distribution
+
+Two main problems arise:
+* (P1) A large portion of the sample is drawn from distributions that are significantly different from the target distribution
+* (P2) The effective size of the sample is too small
+
+(P1) can be addressed by discarding a large chunk of initial observations (burn-in sample) or by increasing the no. of iterations (MCMC sample size)
+
 Markov Chain Monte Carlo (MCMC) diagnostics are tools that can be used to check whether the quality of a sample generated with an MCMC algorithm is sufficient to provide an accurate approximation of the target distribution.
 
 In particular, MCMC diagnostics are used to check:
 
 * whether a large portion of the MCMC sample has been drawn from distributions that are significantly different from the target distribution
 * whether the size of the generated sample is too small.
+
+Diagnostic tools:
+* The simplest way to diagnose problems in an MCMC sample is to split the sample into two or more chunks and check whether we get the same results on all the chunks.
+* Another simple way to diagnose problems is to run the MCMC algorithm more than once with different (possibly, very different) starting points $x_{1}$, so as to obtain multiple MCMC samples.
+* Trace plots may help us to understand what kind of problem (if any) affects our MCMC sample
+
+# 4.1 Trace plots
+
+```{r}
+# Example for the second Beta parameter (weekly)
+plot(results$beta[, 2], type = "l", col = "steelblue", 
+     main = "Trace Plot for Beta_1 (daily rv)",
+     xlab = "Iteration (t)", ylab = "Value")
+
+# Add a red dashed line to mark the end of burn-in
+abline(v = 2000, col = "red", lty = 2, lwd = 2)
+legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
+```
+
+# 4.2 Multiple chains (running the algorithm multiple times in parallel)
+
+```{r}
+library(parallel)
+
+
+# function to run chains in parallel (Mac/Linux use mclapply; Windows requires parLapply)
+chains_list <- mclapply(1:n_chains, function(i) {
+  gibbs_har(y, X, n_iter = 10000, burnin = 2000)
+}, mc.cores = n_chains)
+
+
+# Run 2 chains (i.e. running the MCMC algorithm twice)
+n_chains <- 2
+
+# lapply(): applies a function over a list or vector
+chains_out <- lapply(1:n_chains, function(i) {
+  # Start from a different random beta 
+  # This helps verify if they converge to the same posterior
+  beta_init <- rnorm(ncol(X), 0, 1) 
+  
+  # Call your function (make sure it returns the full n_iter)
+  gibbs_har(y, X, n_iter = 10000, burnin = 2000)
+})
+
+
+str( chains_out ) # displaying the structure of the list object
+
+# comparing the posterior colMeans of both chains
+colMeans(chains_out[[1]]$beta)
+colMeans(chains_out[[2]]$beta)
+
+
+```
+
 

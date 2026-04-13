@@ -3,7 +3,9 @@
 title: "Har_Model_Botta"
 author: 
   name: Manuel Schreiber
-output: html_document
+output: 
+  html_document:
+    self_contained: true
 
 ---
 

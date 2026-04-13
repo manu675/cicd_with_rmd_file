@@ -11,8 +11,8 @@ output: html_document
 
 ## Section 1: data preparation ##
 
-$$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$ : "continuous grow rate from P1 to P2"
-f.ex. log(96/95)=log(1.01053)~0.0105, i.e. a growth rate of 1.05% or the log return
+$$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$ : "continuous grow rate from P1 to P2"  
+f.ex. log(96/95)=log(1.01053)~0.0105, i.e. a growth rate of 1.05% or the log return  
 the percentage change would be $$\frac{P2-P1}{P1}=\frac{96-95}{95}~0.0105$$
 
 ```{r}
@@ -158,7 +158,8 @@ mean(results$sigma2) # posterior mean for the std dev
 
 ## Section 4: MCMC diagnostics
 
-Recap of the Markov Chain Monte Carlo algorithm:
+Recap of the Markov Chain Monte Carlo algorithm:  
+
 * a sequence of random variables $\{X_t\}$ is produced
 * this sequence is a Markov Chain
 * the larger $t$ is, the more similar the distribution of $X_t$ is to the target distribution
@@ -166,20 +167,22 @@ Recap of the Markov Chain Monte Carlo algorithm:
 * when we run a MCMC algorithm for $T$ periods, we obtain a MCMC sample of the first $T$ realizations of the chain, $$X_1,\ldots,X_T$$
 * we then use the empirical distribution of this MCMC sample to approximate the target distribution
 
-Two main problems arise:
+Two main problems arise:  
+
 * (P1) A large portion of the sample is drawn from distributions that are significantly different from the target distribution
 * (P2) The effective size of the sample is too small
 
-(P1) can be addressed by discarding a large chunk of initial observations (burn-in sample) or by increasing the no. of iterations (MCMC sample size)
+(P1) can be addressed by discarding a large chunk of initial observations (burn-in sample) or by increasing the no. of iterations (MCMC sample size)  
 
 Markov Chain Monte Carlo (MCMC) diagnostics are tools that can be used to check whether the quality of a sample generated with an MCMC algorithm is sufficient to provide an accurate approximation of the target distribution.
 
-In particular, MCMC diagnostics are used to check:
+In particular, MCMC diagnostics are used to check:  
 
 * whether a large portion of the MCMC sample has been drawn from distributions that are significantly different from the target distribution
 * whether the size of the generated sample is too small.
 
 Diagnostic tools:
+
 * The simplest way to diagnose problems in an MCMC sample is to split the sample into two or more chunks and check whether we get the same results on all the chunks.
 * Another simple way to diagnose problems is to run the MCMC algorithm more than once with different (possibly, very different) starting points $x_{1}$, so as to obtain multiple MCMC samples.
 * Trace plots may help us to understand what kind of problem (if any) affects our MCMC sample
@@ -187,25 +190,31 @@ Diagnostic tools:
 # 4.1 Trace plots
 
 ```{r}
-# Example for the second Beta parameter (weekly)
+# Example for the second Beta parameter (daily)
 plot(results$beta[, 2], type = "l", col = "steelblue", 
      main = "Trace Plot for Beta_1 (daily rv)",
      xlab = "Iteration (t)", ylab = "Value")
 
-# Add a red dashed line to mark the end of burn-in
-abline(v = 2000, col = "red", lty = 2, lwd = 2)
-legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
+
 ```
 
 
 trace plot of all mcmc samples including the burn-in samples
 
 ```{r}
-# setting the no. of burnin samples to 0 to plot all mcmc samples
-results <- gibbs_har(y, X, n_iter = 10000, burnin = 0)
+# new function call with burn-in samples
+results <- gibbs_har(y, X, 
+n_iter = 10000, 
+burnin = 0 # setting the no. of burnin samples to 0 to plot all mcmc samples
+)
 
 # Now results$beta contains all 10,000 iterations starting from iteration 1
-plot(results$beta[, 1], type = "l", main = "Trace Plot with Burn-in")
+plot(results$beta[, 2], type = "l", col = "steelblue" 
+main = "Trace Plot for Beta_1 (daily rv) with burn-in")
+
+# Add a red dashed line to mark the end of burn-in
+abline(v = 2000, col = "red", lty = 2, lwd = 2)
+legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 ```
 
 

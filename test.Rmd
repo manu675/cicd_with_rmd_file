@@ -209,7 +209,7 @@ burnin = 0 # setting the no. of burnin samples to 0 to plot all mcmc samples
 )
 
 # Now results$beta contains all 10,000 iterations starting from iteration 1
-plot(results$beta[, 2], type = "l", col = "steelblue" 
+plot(results$beta[, 2], type = "l", col = "steelblue", 
 main = "Trace Plot for Beta_1 (daily rv) with burn-in")
 
 # Add a red dashed line to mark the end of burn-in

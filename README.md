@@ -7,7 +7,7 @@
 * Beta is modelled as multivariate normal and sigma^2 (the error variance) is modelled as inverse gamma
 * A Gibbs sampler is used to compute posterior mean estimates for the 3 persistence parameters as well as the variance of the errors
 
-**I replicated his HAR model and added MCMC algorithm diagnostics** 
+**I replicated his HAR model and added MCMC algorithm diagnostics.**   
 **Moreover, I added a continuous integration continuous deployment (CICD) workflow through Github actions and automated the knitting of the R Markdown file to HTML.**
 
 

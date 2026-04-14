@@ -72,7 +72,7 @@ for(i in 1:n_obs) {
 t <- start_idx + i - 1
 # Dependent variable
 y[i] <- rv[t]
-# Regressors
+# Regressors (regressor matrix)
 X[i, 1] <- 1 # intercept
 X[i, 2] <- rv[t-1] # daily rv
 X[i, 3] <- mean(rv[(t-5):(t-1)]) # weekly realized variance (5 trading days)
@@ -124,11 +124,16 @@ V_0_inv <- solve(V_0); XtX <- t(X) %*% X; Xty <- t(X) %*% y
 
 ##print(V_0_inv)
 
+
+# V_n is the posterior variance-covariance matrix of the regressors; diagonal elements: var, off-diagonal elements: covariances between the coefficients
+# beta_n and V_n are the parameters of the multivariate normal distribution of the beta parameter
+# a_n and b_n are the parameters of the inverse gamma distribution of the sigma^2 parameter
+
 # main loop (systematic scan Gibs-sampler)
 for (iter in 1:n_iter) {
 # Update beta | sigma2, y
 V_n_inv <- V_0_inv + XtX / sigma2
-V_n <- solve(V_n_inv)
+V_n <- solve(V_n_inv) 
 beta_n <- V_n %*% (V_0_inv %*% beta_0 + Xty / sigma2) 
 beta <- drop(beta_n + t(chol(V_n)) %*% rnorm(k))
 # Update sigma2 | beta, y

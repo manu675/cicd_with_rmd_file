@@ -2,7 +2,7 @@
 * Botta (2026) argues that Heterogeneous AutoRegressive Models (HAR) can capture multi-horizon volatility dynamics in financial markets
 * The long-memory process of financial volatility is approximated with a simple autoregressive structure across multiple time scales
 * Volatility is characterized by a cascade structure, i.e. short-term volatility affects medium-term volatility and so on.
-* In the model, an intercept(beta_0), daily (beta_1), weekly (beta_2), and monthly (beta_3) volatility persistence parameters and an error term are used 
+* In the model, an intercept($\beta_0$), daily ($\beta_d$), weekly ($\beta_w$), and monthly ($\beta_m$) volatility persistence parameters and an error term are used 
 * A Bayesian framework is used here to prevent overfitting due to correlated regressors and to quantify uncertainty in voltatility persistence parameters
 * Beta is modelled as multivariate normal and sigma^2 (the error variance) is modelled as inverse gamma
 * A systematic scan Gibbs-sampler is used to compute posterior mean estimates for the 3 persistence parameters as well as the variance of the errors

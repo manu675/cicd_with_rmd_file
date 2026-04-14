@@ -233,10 +233,12 @@ legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 ```{r}
 # posterior histogram for the daily realized volatility coefficient
 hist(results$beta[, 2], 
-     probability=TRUE, # True: frequency density, False: counts
+     probability=FALSE, # TRUE: frequency density, FALSE: counts
      breaks=30,
      col = "steelblue", 
      main = "Histogram of the posterior for Beta_d (daily rv)",
+     ylab = "Frequency (counts)",
+     xlab = expression(paste("Daily Persistence ", beta[d])) # R markdown subscript syntax
 )
 
 # Add a blue dashed line to mark the posterior mean 

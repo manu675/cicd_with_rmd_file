@@ -202,7 +202,7 @@ Diagnostic tools:
 # 4.1 Trace plots
 
 ```{r}
-# Example for the second Beta parameter (daily)
+# trace plot for the daily realized volatility coefficient, i.e. the path the sampler visited to map out the posterior distribution
 plot(results$beta[, 2], type = "l", col = "steelblue", 
      main = "Trace Plot for Beta_1 (daily rv)",
      xlab = "Iteration (t)", ylab = "Value")
@@ -230,6 +230,15 @@ legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 ```
 
 
+```{r}
+# posterior histogram for the daily realized volatility coefficient
+plot(hist(results$beta[, 2]), type = "l", col = "steelblue", 
+     main = "Histogram of the posterior for Beta_1 (daily rv)",
+     #xlab = "Iteration (t)", ylab = "Value"
+)
+
+
+```
 
 # 4.2 Multiple chains (running the algorithm multiple times in parallel)
 

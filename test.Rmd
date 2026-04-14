@@ -1,6 +1,6 @@
 
 ---
-title: "Har_Model_Botta"
+title: "HAR_volatility_model_via_MCMC_estimation_plus_model_diagnostics"
 author: 
   name: Manuel Schreiber
 output: 
@@ -13,9 +13,10 @@ output:
 
 ## Section 1: data preparation ##
 
-$$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$ : "continuous grow rate from P1 to P2"  
-f.ex. log(96/95)=log(1.01053)~0.0105, i.e. a growth rate of 1.05% or the log return  
-the percentage change would be $$\frac{P2-P1}{P1}=\frac{96-95}{95}~0.0105$$
+The log return or equivalently the continuous grow rate from $P_1$ to $P2$ is   
+$$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$.
+F.ex. consider log(96/95)=log(1.01053)~0.0105, which equals a growth rate of 1.05%.
+The percentage change would be $$\frac{P2-P1}{P1}=\frac{96-95}{95}~0.0105$$, so we can see that this approximation works.
 
 ```{r}
 # install libraries
@@ -24,7 +25,7 @@ if (!require("quantmod")) install.packages("quantmod")
 # Load required libraries
 suppressMessages({ library(quantmod); library(xts)
 })
-# Download S&P 500 data (2020-2023, i.e. 4 years)
+# Download S&P 500 index data (2020-2023, i.e. 4 years)
 getSymbols("^GSPC", from="2020-01-01", to="2023-12-31", auto.assign=TRUE, warnings=FALSE)
 
 prices <- Cl(GSPC) # closing prices (252*4 = 1008)
@@ -92,6 +93,9 @@ head(X) # regressor matrix
 
 ## Section 2: MCMC functions ##
 
+The Gibbs sampler generates a Markov chain with stationary distribution $f$ from a at least two dimensional probability density function (or probability mass function) $f$ on the discrete, finite sample space $\Omega \in \mathbb{R}^{d}, d \geq 2$ by sequentially updating coordinates of $\boldsymbol{x} \in \Omega$. We don't need proposal functions because the Gibbs sampler draws from the conditional distribution of $X_k|X_{-k}=x_k$ to update entry $k$ of $\boldsymbol{x}$.
+In this case, we use a systematic-scan Gibbs-sampler because we cycle through the parameters of interest, $\beta$ and $\sigma^{2}$ in a fixed order.
+
 ```{r}
 # Gibbs sampler for Bayesian HAR
 gibbs_har <- function(y, 
@@ -120,6 +124,7 @@ V_0_inv <- solve(V_0); XtX <- t(X) %*% X; Xty <- t(X) %*% y
 
 ##print(V_0_inv)
 
+# main loop (systematic scan Gibs-sampler)
 for (iter in 1:n_iter) {
 # Update beta | sigma2, y
 V_n_inv <- V_0_inv + XtX / sigma2
@@ -128,7 +133,7 @@ beta_n <- V_n %*% (V_0_inv %*% beta_0 + Xty / sigma2)
 beta <- drop(beta_n + t(chol(V_n)) %*% rnorm(k))
 # Update sigma2 | beta, y
 residuals <- y - X %*% beta
-a_n <- a_0 + T_obs / 2
+a_n <- a_0 + T_obs / 2 
 b_n <- b_0 + sum(residuals^2) / 2 
 sigma2 <- 1 / rgamma(1, a_n, b_n)
 

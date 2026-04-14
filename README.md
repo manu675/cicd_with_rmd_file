@@ -5,7 +5,7 @@
 * In the model, an intercept($\beta_0$), daily ($\beta_d$), weekly ($\beta_w$), and monthly ($\beta_m$) volatility persistence parameters and an error term are used 
 * A Bayesian framework is used here to prevent overfitting due to correlated regressors and to quantify uncertainty in voltatility persistence parameters
 * Beta is modelled as multivariate normal and sigma^2 (the error variance) is modelled as inverse gamma
-* A systematic scan Gibbs-sampler is used to compute posterior mean estimates for the 3 persistence parameters as well as for the variance of the errors
+* A systematic scan Gibbs-sampler is used to compute posterior mean estimates for the 3 persistence parameters as well as for the variance of the errors by using full conditional distributions. First, $\beta$ is updated using the current $\sigma^2$, then $sigma^2$ is updated using the new $\beta$ in each iteration by sampling from the multivariate normal distribution in case of $\beta$ and then from the inverse gamma distribution in case of $\sigma^2$.
 
 The HAR model for realized volatility is 
 $`RV_t = \beta_{0} + \beta_{d}*RV_{t-1} + \beta_{w}*RV^{(w)}_{t-1} + \beta_{m}*RV^{(m)}_{t-1} +\epsilon_{t}`$, 

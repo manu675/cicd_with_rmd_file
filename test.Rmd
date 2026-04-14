@@ -233,7 +233,7 @@ legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 ```{r}
 # posterior histogram for the daily realized volatility coefficient
 hist(results$beta[, 2], 
-     probability=True, # True: frequency density, False: counts
+     probability=TRUE, # True: frequency density, False: counts
      breaks=30,
      col = "steelblue", 
      main = "Histogram of the posterior for Beta_d (daily rv)",

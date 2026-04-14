@@ -160,9 +160,9 @@ return(list(beta = beta_draws,
 ```{r}
 results <- gibbs_har(y, X)
 
-colMeans(results$beta) # Means of the intercept col, daily, weekly, monthly rv
+colMeans(results$beta) # posterior means of the volatility persistence params: intercept, daily rv, weekly rv, monthly rv
 
-mean(results$sigma2) # posterior mean for the std dev
+mean(results$sigma2) # posterior mean for the error variane
 
 
 ##hist(results$beta)

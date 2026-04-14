@@ -1,6 +1,6 @@
 
 ---
-title: "HAR_volatility_model_via_MCMC_estimation_plus_model_diagnostics"
+title: "HAR_volatility_model_via_MCMC_estimation_plus_diagnostics"
 author: 
   name: Manuel Schreiber
 output: 

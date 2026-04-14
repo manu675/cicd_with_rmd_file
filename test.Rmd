@@ -204,7 +204,7 @@ Diagnostic tools:
 ```{r}
 # trace plot for the daily realized volatility coefficient, i.e. the path the sampler visited to map out the posterior distribution
 plot(results$beta[, 2], type = "l", col = "steelblue", 
-     main = "Trace Plot for Beta_1 (daily rv)",
+     main = "Trace Plot for beta_d (daily rv)",
      xlab = "MCMC Iteration (t)", ylab = "Value")
 
 
@@ -222,7 +222,7 @@ burnin = 0 # setting the no. of burnin samples to 0 to plot all mcmc samples
 
 # Now results$beta contains all 10,000 iterations starting from iteration 1
 plot(results$beta[, 2], type = "l", col = "steelblue", 
-main = "Trace Plot for Beta_1 (daily rv) with burn-in")
+main = "Trace Plot for Beta_d (daily rv) with burn-in")
 
 # Add a red dashed line to mark the end of burn-in
 abline(v = 2000, col = "red", lty = 2, lwd = 2)
@@ -235,7 +235,7 @@ legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 hist(results$beta[, 2], 
      breaks=30,
      col = "steelblue", 
-     main = "Histogram of the posterior for Beta_1 (daily rv)",
+     main = "Histogram of the posterior for Beta_d (daily rv)",
 )
 
 # Add a blue dashed line to mark the posterior mean 

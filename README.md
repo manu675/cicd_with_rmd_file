@@ -7,6 +7,10 @@
 * Beta is modelled as multivariate normal and sigma^2 (the error variance) is modelled as inverse gamma
 * A systematic scan Gibbs-sampler is used to compute posterior mean estimates for the 3 persistence parameters as well as the variance of the errors
 
+The HAR model for realized volatility is $RV_t = \beta_0+\beta_d*RV_{t-1}+\beta_w*RV^{w}_{t-1}+\beta_m*RV^{m}_{t-1}+\epsilon_t$, where $\epsilon_t ~ N(0,\sigma^2)$.  
+The parameter vector of interest is $\boldsymbol{\beta}=(\beta_0,\beta_d,\beta_w,\beta_m)^{T}$
+The prior is $p(\theta)=p(\beta)*p(\sigma^2)$ and the posterior is $p(\theta|RV) \propto L(\theta)*p(\theta)$
+
 **I replicated his HAR model and added MCMC algorithm diagnostics.**   
 **Moreover, I added a continuous integration continuous deployment (CICD) workflow through Github actions and automated the knitting of the R Markdown file to HTML.**
 

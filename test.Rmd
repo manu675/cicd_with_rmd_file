@@ -158,6 +158,7 @@ return(list(beta = beta_draws,
 ## Section 3: extracting the results ##
 
 ```{r}
+# results$beta and results$sigma2 contain the empirical (posterior) distributions of the two estimated parameters of interest
 results <- gibbs_har(y, X)
 
 colMeans(results$beta) # posterior means of the volatility persistence params: intercept, daily rv, weekly rv, monthly rv
@@ -165,7 +166,6 @@ colMeans(results$beta) # posterior means of the volatility persistence params: i
 mean(results$sigma2) # posterior mean for the error variane
 
 
-##hist(results$beta)
 ```
 
 ## Section 4: MCMC diagnostics
@@ -232,7 +232,7 @@ legend("topright", legend = "End of Burn-in", col = "red", lty = 2)
 
 ```{r}
 # posterior histogram for the daily realized volatility coefficient
-hist(results$beta[, 2]), 
+hist(results$beta[, 2], 
      breaks=30,
      col = "steelblue", 
      main = "Histogram of the posterior for Beta_1 (daily rv)",

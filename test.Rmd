@@ -13,7 +13,7 @@ output:
 
 ## Section 1: data preparation ##
 
-The log return or equivalently the continuous grow rate from $P_1$ to $P2$ is   
+The log return or equivalently the continuous grow rate from $P_1$ to $P_2$ is   
 $$ log(P_2) - log(P_2) = log(\frac{P2}{P1})$$.
 F.ex. consider log(96/95)=log(1.01053)~0.0105, which equals a growth rate of 1.05%.
 The percentage change would be $$\frac{P2-P1}{P1}=\frac{96-95}{95}~0.0105$$, so we can see that this approximation works.
@@ -163,7 +163,7 @@ results <- gibbs_har(y, X)
 
 colMeans(results$beta) # posterior means of the volatility persistence params: intercept, daily rv, weekly rv, monthly rv
 
-mean(results$sigma2) # posterior mean for the error variane
+mean(results$sigma2) # posterior mean for the error variance
 
 
 ```
